@@ -1,0 +1,418 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// ============================================
+// CONFIGURATION
+// ============================================
+
+const AVATAR_ASSETS = {
+  idle: '/mobile/commo image.png',
+  typing: ['/mobile/typing2.mp4'],
+  speaker: '/mobile/speaker up.mp4',
+};
+
+const RESPONSES = {
+  me: {
+    normal: [
+      { text: "I am **Abhay Mallick**, a *Full Stack Developer* and *Product Engineer* specializing in high-performance digital solutions. My expertise lies in building seamless, full-scale applications using **Next.js**, **React**, and **Vue.js**, backed by robust **Node.js/Express** architectures." },
+      { text: "I build the things others find too complex. My work is defined by a deep understanding of **Modern Web Stacks** — specifically **Next.js 15**, **TypeScript**, and **Cloud Scalability (AWS)**. I engineer products that handle real-world scale with optimized **MongoDB/SQL** backends." }
+    ],
+    funny: [
+      { text: "Besides being a dev, I'm also really good at making coffee disappear and turning bugs into 'features'. If you're looking for someone who can code and keep the vibes high, you've found him. Maybe we should stop talking about code for a second? 😉" }
+    ],
+    annoyed: [
+      { text: "Still checking who I am? I haven't changed! I'm **Abhay Mallick**, a developer who builds things that don't break. Now, pick a different button." },
+      { text: "Are you trying to find a secret bio? I specialize in **Next.js and Node.js**. That's the bio. Now explore my **Works**." },
+      { text: "Okay, you're either a fan of my name or you're stuck. Check out my **Tech Stack** to see how I actually build things." }
+    ]
+  },
+
+  experience: {
+    normal: [
+      { text: "My professional journey covers everything from **Enterprise CRMs** to **E-commerce platforms**. I've mastered the development lifecycle, ensuring architectural integrity and high availability on **AWS**." },
+      { text: "Successfully delivered over **50+ projects**, utilizing **Modern DevOps** and **Cloud Workflows**. I specialize in moving fast using **Node.js** and **React** without compromising on quality." }
+    ],
+    funny: [
+      { text: "My experience includes surviving 2,000+ merge conflicts and only crying twice. I'm basically a veteran in the 'JavaScript fatigue' wars. 😉" }
+    ],
+    annoyed: [
+      { text: "My experience isn't going to grow just because you keep clicking. I've built 50+ projects, interned at Inspire, and now I'm here." },
+      { text: "I can't add an internship mid-conversation! **Jul-Dec 2024 at Inspire**, **Jan-Jun 2024 trainee**. That's it." },
+      { text: "Is my timeline not impressive enough? I've been grinding in the **MERN** stack for 2+ years. Pressing this won't make it 3 years yet!" }
+    ]
+  },
+
+  projects: {
+    normal: [
+      { text: "My flagship project is **Cosmic IDE**, a powerful tool with **full debugging**, **native execution**, and an **extension ecosystem**. It even features **AI-native file creation**." },
+      { text: "I've also built **TAFE CRM**, **Nexus AI**, and **InsightFlow**. I prioritize **PostgreSQL/MongoDB** and **AWS** for global scaling and security." }
+    ],
+    funny: [
+      { text: "I build so many projects that my keyboard is starting to file for a restraining order. But hey, at least the code is clean! 😉" }
+    ],
+    annoyed: [
+      { text: "Cosmic IDE is still my flagship. Maybe it's time to stop clicking and actually **Reach Out**?" },
+      { text: "Still looking for **The One Project**? They're all good! **TAFE CRM**, **Nexus AI**, **Cosmic IDE**... they demonstrate everything I do." },
+      { text: "Spamming my projects won't manifest a new one. I'm currently working on something big, but it's not ready yet!" }
+    ]
+  },
+
+  tech: {
+    normal: [
+      { text: "My stack: **Next.js**, **React**, **Vue.js**, **Node.js**, and **Express.js**. I handle both **MongoDB** and **SQL** database designs." },
+      { text: "I leverage **AWS** for infrastructure, focusing on **Serverless**, **SSR**, and **Real-time systems**. My frontend is powered by **Framer Motion** and **GSAP**." }
+    ],
+    funny: [
+      { text: "I speak fluent JavaScript, but my true talent is making a white screen turn into a functional app without using 'important!' in CSS... mostly. 😉" }
+    ],
+    annoyed: [
+      { text: "Next.js, React, Node, AWS... the list is the same. I promise my stack didn't suddenly include COBOL." },
+      { text: "TypeScript, MongoDB, Postgres... I haven't switched to PHP in the last 5 seconds. Now, click **Who is Abhay?**." },
+      { text: "I'm a modern developer. My stack is **Next.js 15**. That's the bleeding edge. There's nothing newer to show right now!" }
+    ]
+  },
+
+  contact: {
+    normal: [
+      { text: "Ready to build something superior? Connect at **abhaymallick.dev@gmail.com** or call me at **+91 84218 22204**." },
+      { text: "Explore my work on **GitHub (@Abhay2204)** or connect on **LinkedIn**. I'm always open to high-impact collaborations." }
+    ],
+    funny: [
+      { text: "I'm great at replying to emails, but I'm even better at helping you win that 'who has the coolest app' competition. Call me? 😉" }
+    ],
+    annoyed: [
+      { text: "If you want to talk to me, just send the email! **abhaymallick.dev@gmail.com** — it's right there!" },
+      { text: "Are you testing the hover state or do you actually want to collaborate? Email is **abhaymallick.dev@gmail.com**." },
+      { text: "You've found my contact info 4 times now. What's the hold up? **Reach Out** properly!" }
+    ]
+  }
+};
+
+// ============================================
+// TYPES
+// ============================================
+
+interface Message {
+  id: number;
+  sender: 'abhay' | 'user';
+  text: string;
+  reasoning?: string;
+}
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
+export default function DesktopChatbot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 1, sender: 'abhay', text: "I am **Abhay Mallick**. I engineer scalable systems and high-end digital experiences. What would you like to verify?" }
+  ]);
+  const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [buttonCount, setButtonCount] = useState<Record<string, number>>({});
+  const [input, setInput] = useState("");
+  
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (isOpen) scrollToBottom();
+  }, [messages, isTyping, isOpen]);
+
+  const playVideo = (type: keyof typeof AVATAR_ASSETS) => {
+    const asset = AVATAR_ASSETS[type];
+    const source = Array.isArray(asset) ? asset[Math.floor(Math.random() * asset.length)] : asset;
+    setCurrentVideo(source as string);
+  };
+
+  const handleAction = async (category: keyof typeof RESPONSES) => {
+    if (isTyping) return;
+
+    const newCounts = { ...buttonCount, [category]: (buttonCount[category] || 0) + 1 };
+    setButtonCount(newCounts);
+
+    const count = newCounts[category];
+    const catPool = RESPONSES[category as keyof typeof RESPONSES];
+    let selectedText = "";
+
+    if (count <= 2) {
+      selectedText = catPool.normal[count - 1]?.text || catPool.normal[0].text;
+    } else if (count === 3) {
+      selectedText = catPool.funny[0].text;
+    } else {
+      const idx = Math.floor(Math.random() * catPool.annoyed.length);
+      selectedText = catPool.annoyed[idx].text;
+    }
+
+    const userLabel = category === 'me' ? "Who is Abhay?" :
+      category === 'projects' ? "Recent Projects" :
+      category === 'tech' ? "Your Tech Stack" :
+      category === 'experience' ? "Work Experience" : "Get in Touch";
+
+    const promptId = Date.now();
+    setMessages(prev => [...prev, { id: promptId, sender: 'user', text: userLabel }]);
+    
+    setIsTyping(true);
+    playVideo('typing');
+
+    const responseId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: responseId, sender: 'abhay', text: "" }]);
+
+    const totalDuration = 6000;
+    const interval = 50;
+    const steps = totalDuration / interval;
+    const charsPerStep = Math.ceil(selectedText.length / steps);
+    
+    for (let i = 1; i <= steps; i++) {
+      const currentPos = Math.min(i * charsPerStep, selectedText.length);
+      const visibleText = selectedText.slice(0, currentPos);
+      setMessages(prev => prev.map(m => m.id === responseId ? { ...m, text: visibleText } : m));
+      if (currentPos >= selectedText.length) break;
+      await new Promise(r => setTimeout(r, interval));
+    }
+
+    setIsTyping(false);
+    playVideo('speaker');
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!input.trim() || isTyping) return;
+
+    const userText = input;
+    const userMsg: Message = { id: Date.now(), sender: 'user', text: userText };
+    
+    setInput("");
+    setMessages(prev => [...prev, userMsg]);
+    setIsTyping(true);
+    playVideo('typing');
+
+    const responseId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: responseId, sender: 'abhay', text: "", reasoning: "" }]);
+
+    try {
+      const chatHistory = messages.map(m => ({
+        role: m.sender === 'abhay' ? 'assistant' : 'user',
+        content: m.text
+      }));
+      chatHistory.push({ role: 'user', content: userText });
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory }),
+      });
+
+      if (response.status === 503) {
+        setMessages(prev => prev.map(m => m.id === responseId ? { ...m, text: "Our AI service is temporarily unavailable. Please try again in a moment! 🔄" } : m));
+        setIsTyping(false);
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMsg = "Something went wrong on my end.";
+        try {
+          const errData = await response.json();
+          errorMsg = errData.error || errorMsg;
+        } catch (_) {}
+        setMessages(prev => prev.map(m => m.id === responseId ? { ...m, text: errorMsg } : m));
+        setIsTyping(false);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let fullReasoning = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta;
+              
+              if (delta) {
+                if (delta.reasoning_content) {
+                  fullReasoning += delta.reasoning_content;
+                  setMessages(prev => prev.map(m => m.id === responseId ? { ...m, reasoning: fullReasoning } : m));
+                }
+                if (delta.content) {
+                  fullText += delta.content;
+                  setMessages(prev => prev.map(m => m.id === responseId ? { ...m, text: fullText } : m));
+                }
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Chat Error:', error);
+      setMessages(prev => prev.map(m => m.id === responseId ? { ...m, text: "I'm having some trouble connecting to my brain right now. Please try again later!" } : m));
+    } finally {
+      setIsTyping(false);
+      playVideo('speaker');
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Button Animation */}
+      <div className="fixed bottom-8 right-8 z-[2000] hidden md:block">
+        <motion.button
+          onClick={() => setIsOpen(true)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="relative w-16 h-16 bg-[#2b2b2b] rounded-full shadow-2xl flex items-center justify-center border-2 border-white overflow-hidden group shadow-[0_15px_30px_rgba(0,0,0,0.3)]"
+        >
+          <img
+            src="/chatbot.gif"
+            alt="Chatbot Icon"
+            className="absolute inset-0 w-full h-full object-cover scale-[1.3] rounded-full"
+          />
+          <div className="absolute inset-0 bg-[#4a7c7e]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute top-1 right-1 w-3 h-3 bg-teal-400 rounded-full border border-white z-20" 
+          />
+        </motion.button>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[3000] bg-[#2b2b2b]/40 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 50, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-white w-full max-w-[900px] h-[85vh] rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-row border border-white/20"
+            >
+              {/* Left Side - Avatar (Fixed) */}
+              <div className="w-[45%] bg-white relative flex items-center justify-center border-r border-gray-50 overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center p-8">
+                    <img src={AVATAR_ASSETS.idle} className="w-full h-full object-contain" alt="Avatar" />
+                    <video
+                        key={currentVideo || 'none'}
+                        src={currentVideo || undefined}
+                        className={`absolute inset-0 w-full h-full object-contain bg-white transition-opacity duration-300 ${currentVideo ? 'opacity-100' : 'opacity-0'}`}
+                        autoPlay muted playsInline onEnded={() => setCurrentVideo(null)}
+                    />
+                </div>
+                <div className="absolute top-10 left-10 flex items-center gap-3">
+                    <div className="w-3 h-3 bg-teal-500 rounded-full animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2b2b2b]/40">Abhay Mallick • Live AI Agent</span>
+                </div>
+              </div>
+
+              {/* Right Side - Chat Interface */}
+              <div className="flex-1 flex flex-col bg-white">
+                {/* Header */}
+                <div className="px-10 py-8 flex items-center justify-between border-b border-gray-50">
+                    <div>
+                        <h3 className="text-xl font-black uppercase tracking-tighter text-[#2b2b2b]">Interactive Concierge</h3>
+                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Ask anything about my background</p>
+                    </div>
+                    <button 
+                        onClick={() => setIsOpen(false)}
+                        className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-xl transition-colors"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4 scroll-smooth">
+                    {messages.map((msg) => (
+                        <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, x: msg.sender === 'abhay' ? -20 : 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className={`flex flex-col ${msg.sender === 'abhay' ? 'items-start' : 'items-end'}`}
+                        >
+                            {msg.text && (
+                                <div 
+                                    className={`max-w-[85%] px-5 py-3 rounded-3xl text-[13px] leading-relaxed shadow-sm ${
+                                        msg.sender === 'abhay' 
+                                            ? 'bg-gray-50 text-[#2b2b2b] border border-gray-100 rounded-tl-none font-medium' 
+                                            : 'bg-[#2b2b2b] text-white rounded-tr-none font-bold'
+                                    }`}
+                                    dangerouslySetInnerHTML={{ __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<i>$1</i>') }}
+                                />
+                            )}
+                        </motion.div>
+                    ))}
+                    {isTyping && (
+                        <div className="flex justify-start">
+                            <div className="bg-gray-50 px-4 py-2 rounded-2xl flex gap-1 items-center">
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
+                            </div>
+                        </div>
+                    )}
+                    <div ref={chatEndRef} />
+                </div>
+
+                {/* Footer Controls */}
+                <div className="p-6 bg-gray-50/50 border-t border-gray-50 space-y-4">
+                    {/* Input Field */}
+                    <form onSubmit={handleSendMessage} className="relative flex items-center gap-2">
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask me anything..."
+                            className="flex-1 bg-white border border-gray-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b2b2b]/10 transition-all"
+                            disabled={isTyping}
+                        />
+                        <button
+                            type="submit"
+                            disabled={isTyping || !input.trim()}
+                            className="bg-[#2b2b2b] text-white p-4 rounded-2xl hover:bg-black disabled:opacity-50 transition-all active:scale-95"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </form>
+
+                    <div className="grid grid-cols-2 gap-2 opacity-60 hover:opacity-100 transition-opacity">
+                        <button type="button" onClick={() => handleAction('me')} className="px-3 py-2 bg-white hover:bg-gray-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-[#2b2b2b] border border-gray-100">
+                            🧔 BIO
+                        </button>
+                        <button type="button" onClick={() => handleAction('experience')} className="px-3 py-2 bg-white hover:bg-gray-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-[#2b2b2b] border border-gray-100">
+                            💼 EXP
+                        </button>
+                    </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

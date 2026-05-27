@@ -1,0 +1,22 @@
+{
+  "name": "Abhay Mallick — Full Stack Developer",
+  "short_name": "Abhay Mallick",
+  "description": "Portfolio of Abhay Mallick, Full Stack Developer from Chandrapur, Maharashtra. React, Next.js, Node.js, Android, AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "developer", "technology"],
+  "lang": "en-IN",
+  "scope": "/",
+  "prefer_related_applications": false
+}
