@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight, Mail, Phone, MapPin } from 'lucide-react';
 
@@ -35,17 +35,30 @@ function SocialLink({ href, icon: Icon, label }: { href: string; icon: React.Ele
       rel="noopener noreferrer"
       whileHover={{ y: -3 }}
       style={{
-        display: 'flex', alignItems: 'center', gap: '12px',
-        padding: '10px 14px', borderRadius: '12px',
-        textDecoration: 'none', color: 'rgba(255,255,255,0.55)',
-        transition: 'all 0.25s ease', border: '1px solid transparent',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '10px 14px',
+        borderRadius: '12px',
+        textDecoration: 'none',
+        color: 'rgba(0,0,0,0.6)',
+        transition: 'all 0.25s ease',
+        border: '1px solid transparent',
       }}
-      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#fff'; }}
-      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
+        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+        e.currentTarget.style.color = '#2563eb';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'transparent';
+        e.currentTarget.style.borderColor = 'transparent';
+        e.currentTarget.style.color = 'rgba(0,0,0,0.6)';
+      }}
     >
       <Icon style={{ width: 18, height: 18, flexShrink: 0 }} />
       <span style={{ fontSize: '0.8125rem', fontWeight: 600, flex: 1 }}>{label}</span>
-      <ArrowUpRight style={{ width: 14, height: 14, opacity: 0.3 }} />
+      <ArrowUpRight style={{ width: 14, height: 14, opacity: 0.4 }} />
     </motion.a>
   );
 }
@@ -55,6 +68,23 @@ export default function Footer() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 });
   const currentYear = new Date().getFullYear();
+  const [timeString, setTimeString] = useState<string>('');
+
+  useEffect(() => {
+    const updateClock = () => {
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      };
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      setTimeString(formatter.format(new Date()));
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!isInView || !headingRef.current) return;
@@ -71,7 +101,7 @@ export default function Footer() {
         style={{
           display: ch === ' ' ? 'inline' : 'inline-block',
           opacity: 0,
-          color: accent ? '#3b82f6' : undefined,
+          color: accent ? '#2563eb' : undefined,
         }}>
         {ch === ' ' ? '\u00A0' : ch}
       </span>
@@ -87,26 +117,30 @@ export default function Footer() {
 
       <footer ref={sectionRef} id="contact"
         aria-label="Contact Abhay Mallick — Full Stack Developer"
-        style={{ position: 'relative', width: '100%', background: '#0a0a0a', color: '#fff', overflow: 'hidden' }}
+        style={{ position: 'relative', width: '100%', background: '#FAFAFA', color: '#111111', overflow: 'hidden' }}
         itemScope
         itemType="https://schema.org/ContactPage"
       >
 
         {/* Noise */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.03,
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.02,
           backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
           backgroundSize: '128px 128px',
         }} />
 
         {/* Marquee */}
-        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '20px 0' }}>
+        <div style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', borderTop: '1px solid rgba(0,0,0,0.06)', overflow: 'hidden', padding: '20px 0', background: '#ffffff' }}>
           <div style={{ display: 'flex', whiteSpace: 'nowrap', animation: 'ftrMarquee 25s linear infinite' }}>
             {[0,1,2,3].map(i => (
               <span key={i} style={{
-                fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.25em',
-                textTransform: 'uppercase', color: 'rgba(255,255,255,0.08)',
-                paddingRight: 16, flexShrink: 0,
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                letterSpacing: '0.25em',
+                textTransform: 'uppercase',
+                color: 'rgba(0,0,0,0.12)',
+                paddingRight: 16,
+                flexShrink: 0,
               }}>{MARQUEE_TEXT}</span>
             ))}
           </div>
@@ -119,10 +153,10 @@ export default function Footer() {
             display: 'flex', alignItems: 'center', gap: 16,
             paddingTop: 'clamp(80px, 12vw, 120px)', marginBottom: 32,
             fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.1em',
-            textTransform: 'uppercase', color: '#3b82f6',
+            textTransform: 'uppercase', color: '#2563eb',
           }}>
             <span>08</span>
-            <div style={{ width: 32, height: 2, background: '#3b82f6' }} />
+            <div style={{ width: 32, height: 2, background: '#2563eb' }} />
             <span>Get In Touch</span>
           </div>
 
@@ -130,7 +164,7 @@ export default function Footer() {
           <h2 ref={headingRef} style={{
             fontSize: 'clamp(2.8rem, 8vw, 7rem)', fontWeight: 900,
             letterSpacing: '-0.04em', lineHeight: 0.95, marginBottom: 40,
-            perspective: '600px',
+            perspective: '600px', color: '#111111',
           }}>
             {renderChars("Let's build")}<br />
             {renderChars("something", true)}<br />
@@ -140,14 +174,15 @@ export default function Footer() {
           {/* CTA Row */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 'clamp(60px, 8vw, 100px)' }}>
             <motion.a href={`mailto:${CONTACT.email}`}
-              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 12,
                 padding: '16px 32px', borderRadius: 999,
-                background: '#3b82f6', color: '#fff',
+                background: '#2563eb', color: '#fff',
                 fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase',
                 letterSpacing: '0.12em', textDecoration: 'none', cursor: 'pointer',
-                boxShadow: '0 0 40px rgba(59,130,246,0.3), 0 0 80px rgba(59,130,246,0.1)',
+                boxShadow: '0 10px 30px rgba(37,99,235,0.2)',
+                transition: 'all 0.3s ease',
               }}>
               <Mail style={{ width: 16, height: 16 }} />
               <span>Send a Message</span>
@@ -155,15 +190,33 @@ export default function Footer() {
             </motion.a>
 
             <motion.a href={`tel:${CONTACT.phone.replace(/\s/g, '')}`}
-              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 12,
-                padding: '16px 32px', borderRadius: 999,
-                background: 'transparent', color: 'rgba(255,255,255,0.7)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '0.12em', textDecoration: 'none', cursor: 'pointer',
-              }}>
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '16px 32px',
+                borderRadius: 999,
+                background: 'transparent',
+                color: 'rgba(0,0,0,0.7)',
+                border: '1px solid rgba(0,0,0,0.1)',
+                fontSize: '0.8125rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
+                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)';
+              }}
+            >
               <Phone style={{ width: 16, height: 16 }} />
               <span>{CONTACT.phone}</span>
             </motion.a>
@@ -178,15 +231,16 @@ export default function Footer() {
 
             {/* MAP CARD */}
             <div style={{
-              borderRadius: 20, overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.06)',
-              background: '#111', minHeight: 380, position: 'relative',
+              borderRadius: 24, overflow: 'hidden',
+              border: '1px solid rgba(0,0,0,0.08)',
+              background: '#ffffff', minHeight: 380, position: 'relative',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
             }}>
               {/* Glow */}
               <div style={{
-                position: 'absolute', top: '50%', left: '50%', width: 200, height: 200,
+                position: 'absolute', top: '50%', left: '50%', width: 250, height: 250,
                 transform: 'translate(-50%,-50%)',
-                background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(37,99,235,0.05) 0%, transparent 75%)',
                 pointerEvents: 'none', zIndex: 2,
               }} />
 
@@ -195,7 +249,7 @@ export default function Footer() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d119743.5!2d79.2298!3d19.9504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd2dc50b4e3e4b7%3A0x7b1e4e5a2f0d2b1a!2sChandrapur%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1700000000!5m2!1sen!2sin"
                 style={{
                   width: '100%', height: '100%', minHeight: 380, border: 'none',
-                  filter: 'invert(90%) hue-rotate(180deg) saturate(0.3) brightness(0.7) contrast(1.2)',
+                  filter: 'grayscale(0.9) contrast(1.1) brightness(0.98)',
                 }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -205,31 +259,32 @@ export default function Footer() {
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 3 }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: '50%',
-                  background: 'rgba(59,130,246,0.2)',
+                  background: 'rgba(37,99,235,0.15)',
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%,-50%)',
                   animation: 'ftrPulse 2s ease-out infinite',
                 }} />
                 <div style={{
                   width: 12, height: 12, borderRadius: '50%',
-                  background: '#3b82f6', border: '2px solid #fff',
+                  background: '#2563eb', border: '2px solid #fff',
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%,-50%)',
-                  boxShadow: '0 0 20px rgba(59,130,246,0.5)',
+                  boxShadow: '0 0 15px rgba(37,99,235,0.4)',
                 }} />
               </div>
 
               {/* Location label */}
               <div style={{
-                position: 'absolute', bottom: 16, left: 16, zIndex: 3,
+                position: 'absolute', bottom: 20, left: 20, zIndex: 3,
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '8px 14px', borderRadius: 8,
-                background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em',
-                textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)',
+                background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em',
+                textTransform: 'uppercase', color: 'rgba(0,0,0,0.7)',
               }}>
-                <MapPin style={{ width: 12, height: 12 }} />
+                <MapPin style={{ width: 12, height: 12, color: '#2563eb' }} />
                 <span>Chandrapur, MH</span>
               </div>
             </div>
@@ -239,12 +294,13 @@ export default function Footer() {
 
               {/* Contact Card */}
               <div style={{
-                background: '#111', border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 20, padding: 24, display: 'flex', flexDirection: 'column', gap: 14,
+                background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 24, padding: 28, display: 'flex', flexDirection: 'column', gap: 16,
+                boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
               }}>
                 <h4 style={{
                   fontSize: '0.6875rem', fontWeight: 800, textTransform: 'uppercase',
-                  letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+                  letterSpacing: '0.2em', color: 'rgba(0,0,0,0.3)', marginBottom: 4,
                 }}>Contact</h4>
 
                 {[
@@ -258,40 +314,46 @@ export default function Footer() {
                       rel="noopener noreferrer"
                       style={{
                         display: 'flex', alignItems: 'center', gap: 12,
-                        fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)',
-                        textDecoration: 'none', transition: 'color 0.2s',
+                        fontSize: '0.8125rem', color: 'rgba(0,0,0,0.65)',
+                        textDecoration: 'none', transition: 'color 0.2s, transform 0.2s',
                         fontStyle: 'normal',
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.color = '#2563eb';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.color = 'rgba(0,0,0,0.65)';
+                      }}
                     >
-                      <item.Icon style={{ width: 16, height: 16, color: '#60a5fa', flexShrink: 0 }} />
-                      <span>{item.text}</span>
+                      <item.Icon style={{ width: 16, height: 16, color: '#2563eb', flexShrink: 0 }} />
+                      <span style={{ fontWeight: 550 }}>{item.text}</span>
                     </El>
                   );
                 })}
 
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 12,
-                  fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)',
+                  fontSize: '0.75rem', color: 'rgba(0,0,0,0.4)',
+                  paddingTop: 8, borderTop: '1px solid rgba(0,0,0,0.05)',
                 }}>
                   <span style={{
                     width: 6, height: 6, borderRadius: '50%', background: '#22c55e',
                     flexShrink: 0, boxShadow: '0 0 8px rgba(34,197,94,0.5)',
                     animation: 'ftrBlink 2s ease-in-out infinite',
                   }} />
-                  <span>{CONTACT.timezone}</span>
+                  <span style={{ fontWeight: 500 }}>{CONTACT.timezone}</span>
                 </div>
               </div>
 
               {/* Socials Card */}
               <div style={{
-                background: '#111', border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 20, padding: 24, display: 'flex', flexDirection: 'column', gap: 6, flex: 1,
+                background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 24, padding: 28, display: 'flex', flexDirection: 'column', gap: 8, flex: 1,
+                boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
               }}>
                 <h4 style={{
                   fontSize: '0.6875rem', fontWeight: 800, textTransform: 'uppercase',
-                  letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+                  letterSpacing: '0.2em', color: 'rgba(0,0,0,0.3)', marginBottom: 4,
                 }}>Socials</h4>
                 <SocialLink href={CONTACT.github} icon={GithubIcon} label="GitHub" />
                 <SocialLink href={CONTACT.linkedin} icon={LinkedinIcon} label="LinkedIn" />
@@ -300,26 +362,155 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Bottom Status */}
+          {/* Bottom Map, Links & Status (Premium Bento Grid) */}
           <div style={{
-            display: 'flex', flexDirection: 'column', gap: 16,
-            padding: '24px 0 32px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            fontSize: '0.6875rem', fontWeight: 600,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.2)',
+            borderTop: '1px solid rgba(0,0,0,0.08)',
+            paddingTop: '60px',
+            paddingBottom: '40px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '40px',
+            fontSize: '0.8125rem',
+            color: '#555555',
           }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* COLUMN A: Dynamic Localized Clock & Availability */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <h5 style={{ fontSize: '0.6875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(0,0,0,0.3)' }}>Status & Time</h5>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{
-                  width: 6, height: 6, borderRadius: '50%', background: '#22c55e',
-                  boxShadow: '0 0 8px rgba(34,197,94,0.5)',
+                  width: 8, height: 8, borderRadius: '50%', background: '#22c55e',
+                  boxShadow: '0 0 10px rgba(34,197,94,0.6)',
                   animation: 'ftrBlink 2s ease-in-out infinite',
                 }} />
-                <span>Available for freelance</span>
+                <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#111111', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Available for Freelance
+                </span>
               </div>
-              <span style={{ color: 'rgba(255,255,255,0.12)' }}>© {currentYear} Abhay Mallick</span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', color: 'rgba(0,0,0,0.55)', fontSize: '0.8125rem' }}>
+                <div>
+                  <span style={{ fontWeight: 650, color: '#111111' }}>Chandrapur, MH, India</span>
+                </div>
+                <div>
+                  <span>Local Time: </span>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563eb', background: 'rgba(37,99,235,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
+                    {timeString || '09:52 AM'}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', color: 'rgba(0,0,0,0.35)', fontWeight: 600, marginLeft: '6px' }}>IST (UTC+5:30)</span>
+                </div>
+              </div>
             </div>
+
+            {/* COLUMN B: Symmetrical Swiss Navigation Map */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <h5 style={{ fontSize: '0.6875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(0,0,0,0.3)' }}>Explore Index</h5>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px' }}>
+                {[
+                  { name: '01 · Home', href: '#hero' },
+                  { name: '02 · About', href: '#about' },
+                  { name: '03 · Skills', href: '#skills' },
+                  { name: '04 · Experience', href: '#timeline' },
+                  { name: '05 · Projects', href: '#projects' },
+                  { name: '06 · UI/UX Gallery', href: '#gallery' }
+                ].map(link => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    style={{
+                      textDecoration: 'none',
+                      color: 'rgba(0,0,0,0.6)',
+                      fontWeight: 600,
+                      fontSize: '0.8125rem',
+                      transition: 'all 0.2s ease',
+                      display: 'inline-block'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.color = '#2563eb';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.color = 'rgba(0,0,0,0.6)';
+                      e.currentTarget.style.transform = 'none';
+                    }}
+                  >
+                    {link.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* COLUMN C: Smooth Return-To-Top Trigger */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
+              <h5 style={{ fontSize: '0.6875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(0,0,0,0.3)' }}>Navigation</h5>
+              
+              <motion.button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                whileHover={{ scale: 1.08, y: -4 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 22px',
+                  borderRadius: '999px',
+                  background: '#ffffff',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  color: '#111111',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'rgba(37,99,235,0.2)';
+                  e.currentTarget.style.color = '#2563eb';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(37,99,235,0.08)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+                  e.currentTarget.style.color = '#111111';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.03)';
+                }}
+              >
+                <span>Back To Top</span>
+                <svg style={{ width: '14px', height: '14px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </motion.button>
+
+              <span style={{ fontSize: '0.6875rem', color: 'rgba(0,0,0,0.3)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                © {currentYear} ABHAY MALLICK · ALL RIGHTS RESERVED
+              </span>
+            </div>
+          </div>
+
+          {/* Monolith Typographic Watermark Signature */}
+          <div style={{ 
+            textAlign: 'center', 
+            borderTop: '1px solid rgba(0,0,0,0.05)',
+            paddingTop: '20px',
+            paddingBottom: '20px',
+            userSelect: 'none',
+            overflow: 'hidden'
+          }}>
+            <span style={{
+              display: 'block',
+              fontSize: 'clamp(3rem, 11vw, 12rem)',
+              fontWeight: 950,
+              letterSpacing: '-0.05em',
+              lineHeight: '0.8',
+              textTransform: 'uppercase',
+              color: 'rgba(0,0,0,0.025)',
+              fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}>
+              Abhay Mallick
+            </span>
           </div>
 
         </div>
@@ -327,3 +518,4 @@ export default function Footer() {
     </>
   );
 }
+

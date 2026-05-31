@@ -7,6 +7,7 @@ import ExpertiseSection from '@/components/ExpertiseSection';
 import UiUxGallery from '@/components/UiUxGallery';
 import Footer from '@/components/Footer';
 import DesktopChatbot from '@/components/DesktopChatbot';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function DesktopPortfolio() {
   return (
@@ -20,6 +21,7 @@ export default function DesktopPortfolio() {
       <UiUxGallery />
       <Footer />
       <DesktopChatbot />
+      <ContextMenu />
     </main>
   );
 }
