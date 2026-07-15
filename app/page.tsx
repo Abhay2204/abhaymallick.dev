@@ -45,7 +45,7 @@ export default function Home() {
 
   // Return a blank screen while measuring to prevent hydration mismatch
   if (isMobile === null || !ActiveComponent) {
-    return <div className="min-h-screen bg-white" />;
+    return <div className="min-h-screen bg-[#111]" />;
   }
 
   return (

@@ -130,37 +130,63 @@ export default function HeroSection() {
   }, [splashComplete]);
 
   const totalFrames = 664; // 240 + 208 + 216
+  const initialPreloadFrames = 50; // Load first 50 frames eagerly for quick interactive start
 
   useEffect(() => {
     const handleResizeCheck = () => setIsMobile(window.innerWidth < 768);
     const timer = setTimeout(handleResizeCheck, 0);
     window.addEventListener('resize', handleResizeCheck);
     
-    // Preload images
     const loadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
 
-    for (let i = 1; i <= totalFrames; i++) {
-      const img = new Image();
-      let src = '';
+    const getFrameSrc = (i: number) => {
       if (i <= 240) {
-        src = `/hero1/ezgif-frame-${i.toString().padStart(3, '0')}.jpg`;
+        return `/hero1/ezgif-frame-${i.toString().padStart(3, '0')}.jpg`;
       } else if (i <= 448) {
-        src = `/hero2/ezgif-frame-${(i - 240).toString().padStart(3, '0')}.jpg`;
+        return `/hero2/ezgif-frame-${(i - 240).toString().padStart(3, '0')}.jpg`;
       } else {
-        src = `/hero3/ezgif-frame-${(i - 448).toString().padStart(3, '0')}.jpg`;
+        return `/hero3/ezgif-frame-${(i - 448).toString().padStart(3, '0')}.jpg`;
       }
+    };
 
-      img.src = src;
+    // Phase 1: Load the first 50 frames immediately
+    for (let i = 1; i <= initialPreloadFrames; i++) {
+      const img = new window.Image();
+      img.src = getFrameSrc(i);
       img.onload = () => {
         loadedCount++;
         setImagesLoaded(loadedCount);
-        if (loadedCount === 1) {
+        if (i === 1) {
           requestAnimationFrame(() => drawFrame(0));
         }
+        if (loadedCount === initialPreloadFrames) {
+          lazyLoadRemaining();
+        }
       };
-      loadedImages.push(img);
+      loadedImages[i - 1] = img;
     }
+
+    // Phase 2: Lazy preload the remaining 614 frames in the background
+    const lazyLoadRemaining = () => {
+      const loader = () => {
+        for (let i = initialPreloadFrames + 1; i <= totalFrames; i++) {
+          const img = new window.Image();
+          img.src = getFrameSrc(i);
+          img.onload = () => {
+            loadedCount++;
+            setImagesLoaded(loadedCount);
+          };
+          loadedImages[i - 1] = img;
+        }
+      };
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        window.requestIdleCallback(loader);
+      } else {
+        setTimeout(loader, 1000);
+      }
+    };
+
     imagesRef.current = loadedImages;
     
     return () => {
@@ -251,7 +277,7 @@ export default function HeroSection() {
         {/* Splash Loading Screen */}
         {!splashComplete && (
           <SplashScreen 
-            progress={imagesLoaded / totalFrames} 
+            progress={Math.min(imagesLoaded / initialPreloadFrames, 1.0)} 
             onComplete={() => setSplashComplete(true)} 
           />
         )}
