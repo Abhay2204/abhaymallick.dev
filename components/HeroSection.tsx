@@ -167,24 +167,45 @@ export default function HeroSection() {
       loadedImages[i - 1] = img;
     }
 
-    // Phase 2: Lazy preload the remaining 614 frames in the background
+    // Phase 2: Lazy preload the remaining 614 frames in staggered batches of 15 to keep main-thread responsive (INP)
     const lazyLoadRemaining = () => {
-      const loader = () => {
-        for (let i = initialPreloadFrames + 1; i <= totalFrames; i++) {
-          const img = new window.Image();
-          img.src = getFrameSrc(i);
-          img.onload = () => {
-            loadedCount++;
-            setImagesLoaded(loadedCount);
-          };
-          loadedImages[i - 1] = img;
+      let currentIndex = initialPreloadFrames + 1;
+      const batchSize = 15;
+
+      const loadNextBatch = () => {
+        if (currentIndex > totalFrames) return;
+
+        const loader = () => {
+          const limit = Math.min(currentIndex + batchSize, totalFrames + 1);
+          for (let i = currentIndex; i < limit; i++) {
+            const img = new window.Image();
+            img.src = getFrameSrc(i);
+            img.onload = () => {
+              loadedCount++;
+              setImagesLoaded(loadedCount);
+            };
+            loadedImages[i - 1] = img;
+          }
+          currentIndex = limit;
+
+          // Queue next batch
+          if (currentIndex <= totalFrames) {
+            if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+              window.requestIdleCallback(loadNextBatch);
+            } else {
+              setTimeout(loadNextBatch, 200);
+            }
+          }
+        };
+
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          window.requestIdleCallback(loader);
+        } else {
+          setTimeout(loader, 100);
         }
       };
-      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        window.requestIdleCallback(loader);
-      } else {
-        setTimeout(loader, 1000);
-      }
+
+      loadNextBatch();
     };
 
     imagesRef.current = loadedImages;
