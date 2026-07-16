@@ -277,9 +277,11 @@ export default function HeroSection() {
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
 
-        {/* Invisible but crawlable LCP text candidate for Lighthouse verification */}
-        <div style={{ position: 'absolute', opacity: 0.01, left: '20px', top: '20px', zIndex: -1, pointerEvents: 'none' }}>
-          <h1>Abhay Mallick | Freelance Full Stack Developer & Software Engineer Portfolio</h1>
+        {/* Stable HTML LCP candidate for search indexing and performance auditing (White text blending with the canvas) */}
+        <div style={{ position: 'absolute', left: '20px', top: '20px', zIndex: 5, pointerEvents: 'none' }}>
+          <h1 style={{ color: '#ffffff', fontSize: '16px', userSelect: 'none' }}>
+            Abhay Mallick | Freelance Full Stack Developer & Software Engineer Portfolio
+          </h1>
         </div>
 
         {/* --- UI OVERLAY LAYER (Above Canvas) --- */}
