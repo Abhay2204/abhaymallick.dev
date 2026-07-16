@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Play, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, Play, X, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const galleryItems = [
   {
@@ -184,124 +184,114 @@ const galleryItems = [
 ];
 
 // ============================================
-// 3D CARD
+// CAROUSEL CARD
 // ============================================
 
-interface Card3DProps {
+interface CarouselCardProps {
   item: typeof galleryItems[0];
-  index: number;
+  isActive: boolean;
   onClick: () => void;
 }
 
-function Card3D({ item, index, onClick }: Card3DProps) {
+function CarouselCard({ item, isActive, onClick }: CarouselCardProps) {
   const [hovered, setHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12;
-    cardRef.current.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${y}deg) scale(1.03)`;
-  };
-
-  const handleMouseLeave = () => {
-    setHovered(false);
-    if (cardRef.current) {
-      cardRef.current.style.transform = `perspective(800px) rotateY(0deg) rotateX(0deg) scale(1)`;
-    }
-  };
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const thumbUrl = item.type === 'yt' ? `https://img.youtube.com/vi/${item.ytId}/maxresdefault.jpg` : null;
 
   return (
     <div
-      ref={cardRef}
-      onMouseEnter={() => setHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className="relative w-full overflow-hidden rounded-xl md:rounded-2xl bg-white border border-black/10 shadow-[0_8px_40px_rgba(0,0,0,0.08)] group cursor-pointer"
-      style={{
-        aspectRatio: '16/10',
-        transition: 'transform 0.2s ease-out, box-shadow 0.3s ease',
-        boxShadow: hovered
-          ? '0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(37,99,235,0.1)'
-          : '0 8px 40px rgba(0,0,0,0.08)',
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`snap-start shrink-0 w-[50vw] sm:w-[35vw] md:w-[26vw] lg:w-[20vw] xl:w-[17vw] cursor-pointer transition-all duration-300 relative rounded-xl overflow-hidden aspect-[16/10] bg-black select-none border ${
+        isActive 
+          ? 'ring-2 ring-blue-600 border-transparent shadow-[0_4px_20px_rgba(37,99,235,0.25)] scale-[0.98]' 
+          : 'border-white/10 hover:border-white/30 hover:scale-[1.02]'
+      }`}
     >
-      {/* ---- LOCAL VIDEO ---- */}
-      {item.type === 'video' && (
+      {/* Background Image / Video Preview */}
+      {item.type === 'video' ? (
         <video
+          ref={videoRef}
           src={item.src}
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-100"
         />
-      )}
-
-      {/* ---- YOUTUBE ---- */}
-      {item.type === 'yt' && (
+      ) : (
         <>
-          {!hovered && (
-            <div className="absolute inset-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbUrl!} alt={item.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-                  <Play className="w-6 h-6 text-[#111] fill-[#111] ml-1" />
-                </div>
-              </div>
-            </div>
+          {thumbUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img 
+              src={thumbUrl} 
+              alt={item.title} 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${hovered ? 'opacity-0' : 'opacity-100'}`} 
+            />
           )}
           {hovered && (
             <iframe
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-105"
               src={`https://www.youtube.com/embed/${item.ytId}?autoplay=1&mute=1&loop=1&playlist=${item.ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3`}
               allow="autoplay; encrypted-media"
-              style={{ pointerEvents: 'none' }}
             />
           )}
         </>
       )}
 
-      {/* ---- BOTTOM INFO BAR ---- */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 block mb-1">
-              {String(index + 1).padStart(2, '0')} · {item.year}
-            </span>
-            <h3 className="text-lg md:text-2xl font-bold text-white tracking-tight leading-tight">{item.title}</h3>
-          </div>
-          {item.href && (
-            <a
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full text-xs font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-colors duration-200 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300"
-            >
-              Live <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-          )}
-        </div>
+      {/* Hover Info Overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent flex flex-col justify-end p-4 transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-90'}`}>
+        <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">
+          {item.category}
+        </span>
+        <h4 className="text-xs font-black text-white uppercase tracking-tight truncate">
+          {item.title}
+        </h4>
       </div>
+      
+      {/* Small Active Indicator Dot */}
+      {isActive && (
+        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]" />
+      )}
     </div>
   );
 }
+
+// ============================================
+// FILTER LOGIC
+// ============================================
+
+const filterItems = (filter: string) => {
+  if (filter === 'ALL') return galleryItems;
+  if (filter === 'MOTION') {
+    return galleryItems.filter(item => 
+      item.id === 'v1' || item.id === 'v2' || item.id === 'p9' || item.id === 'p14'
+    );
+  }
+  if (filter === 'SPATIAL') {
+    return galleryItems.filter(item => 
+      item.id === 'v2' || item.id === 'p2' || item.id === 'p5' || item.id === 'p10' || item.id === 'p13'
+    );
+  }
+  if (filter === 'WEB') {
+    return galleryItems.filter(item => 
+      item.id !== 'v1' && item.id !== 'v2' && item.id !== 'p9' && item.id !== 'p14' && item.id !== 'p2' && item.id !== 'p5' && item.id !== 'p10' && item.id !== 'p13'
+    );
+  }
+  return galleryItems;
+};
 
 // ============================================
 // MAIN
 // ============================================
 
 export default function UiUxGallery() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [maxScroll, setMaxScroll] = useState(0);
   const [selectedItem, setSelectedItem] = useState<typeof galleryItems[0] | null>(null);
+  const [activeItem, setActiveItem] = useState<typeof galleryItems[0]>(galleryItems[0]);
+  const [activeFilter, setActiveFilter] = useState<string>('ALL');
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when gallery item is expanded
   useEffect(() => {
@@ -315,40 +305,29 @@ export default function UiUxGallery() {
     };
   }, [selectedItem]);
 
-  // Measure actual track overflow on mount/resize
-  useEffect(() => {
-    const measure = () => {
-      if (trackRef.current) {
-        const trackW = trackRef.current.scrollWidth;
-        const viewportW = window.innerWidth;
-        setMaxScroll(Math.max(0, trackW - viewportW));
-      }
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
+  const filteredItems = filterItems(activeFilter);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.clientWidth * 0.75;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
-  // Progress bar for both the top of the section and the central glowing line
-  const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-
-  const x = useTransform(scrollYProgress, [0, 1], [0, -maxScroll]);
-  const smoothX = useSpring(x, { stiffness: 60, damping: 28, mass: 1 });
-
-  // More scroll height = slower, more controlled scrolling
-  const scrollHeight = galleryItems.length * 140;
+  const FILTERS = [
+    { id: 'ALL', label: 'All Works' },
+    { id: 'MOTION', label: 'Motion' },
+    { id: 'SPATIAL', label: 'Spatial & 3D' },
+    { id: 'WEB', label: 'Creative Web' }
+  ];
 
   return (
     <section
       id="gallery"
-      ref={containerRef}
-      className="relative bg-[#FAFAFA]"
-      style={{ height: `${scrollHeight}vh` }}
+      className="relative bg-[#FAFAFA] border-t border-black/5 py-16 md:py-24 overflow-hidden select-none"
     >
       {/* Hidden Crawler-only SEO keywords block */}
       <div className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
@@ -357,20 +336,19 @@ export default function UiUxGallery() {
           Explore spatial computer dashboards, liquid interactive motion studies, and next-generation UI designs created by Abhay Mallick, designer and developer.
         </p>
       </div>
-      {/* Background grid — same as entire site */}
+
+      {/* Background grid */}
       <div
-        className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"
+        className="absolute inset-0 pointer-events-none opacity-[0.03] z-0"
         style={{
           backgroundImage: "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
           backgroundSize: "32px 32px"
         }}
       />
 
-      {/* Sticky Viewport */}
-      <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
-
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12">
         {/* Top Header Bar */}
-        <div className="relative z-20 w-full max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 pt-8 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-sm font-bold tracking-widest uppercase text-blue-600 flex items-center gap-4 mb-4">
               <span>07</span>
@@ -396,72 +374,307 @@ export default function UiUxGallery() {
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="w-full h-[1px] bg-black/10 relative z-20">
-          <motion.div className="h-full bg-blue-600" style={{ width: progressWidth }} />
+        {/* Mobile Filter Tabs (rendered above the video player on mobile) */}
+        <div className="flex md:hidden items-center gap-2 overflow-x-auto scrollbar-none py-1 mb-5 select-none">
+          {FILTERS.map((f) => {
+            const isSelected = activeFilter === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => {
+                  setActiveFilter(f.id);
+                  const filtered = filterItems(f.id);
+                  if (filtered.length > 0) {
+                    setActiveItem(filtered[0]);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-[0_2px_10px_rgba(37,99,235,0.4)] border border-blue-500/50'
+                    : 'bg-black/5 border border-black/10 text-black/60 hover:text-black'
+                }`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 3D Horizontal Scroll Track with 2-Row Layout */}
-        <div
-          className="flex-1 relative flex items-center overflow-hidden"
-          style={{ perspective: '1200px' }}
-        >
-          {/* Viewport-fixed background dim line */}
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-black/5 -translate-y-1/2 z-0 pointer-events-none" />
-          
-          {/* Viewport-fixed glowing progress line */}
-          <motion.div 
-            className="absolute top-1/2 left-0 h-[2px] bg-blue-500 shadow-[0_0_15px_#3b82f6] -translate-y-1/2 z-10 origin-left pointer-events-none"
-            style={{ width: progressWidth }}
-          />
+        {/* Streaming Dashboard Player Box (Theater Mode Console) */}
+        <div className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[24/10] rounded-3xl overflow-hidden bg-[#0A0A0A] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.3)] mb-6 md:mb-10 flex flex-col justify-end p-6 md:p-10 lg:p-12">
+          {/* Background Media Container (Autoplay, muted) */}
+          <div className="absolute inset-0 z-0">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeItem.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="w-full h-full relative"
+              >
+                {activeItem.type === 'video' ? (
+                  <video
+                    src={activeItem.src}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover pointer-events-none opacity-100"
+                  />
+                ) : (
+                  <iframe
+                    className="w-full h-full object-cover border-0 pointer-events-none scale-105 opacity-100"
+                    src={`https://www.youtube.com/embed/${activeItem.ytId}?autoplay=1&mute=1&loop=1&playlist=${activeItem.ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3`}
+                    allow="autoplay; encrypted-media"
+                    style={{ pointerEvents: 'none' }}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+            
+            {/* Cinematic Gradient Overlays (Only visible on desktop/md to keep text readable) */}
+            <div className="hidden md:block absolute inset-y-0 left-0 w-full md:w-2/3 bg-gradient-to-r from-black/55 via-black/20 to-transparent z-10 pointer-events-none" />
+            <div className="hidden md:block absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent z-10 pointer-events-none" />
+          </div>
 
-          <motion.div
-            ref={trackRef}
-            style={{ x: smoothX }}
-            className="relative flex items-center h-full px-4 sm:px-8 md:px-24 w-max"
-          >
-            <div className="flex gap-4 sm:gap-6 md:gap-10 lg:gap-12 relative z-20 h-full">
-              {galleryItems.map((item, i) => {
-                const isTop = i % 2 === 0;
-                
+          {/* Top Row: Navigation and Profile (Desktop only) */}
+          <div className="hidden md:flex absolute top-0 left-0 right-0 p-6 items-center justify-between z-20 bg-gradient-to-b from-black/45 to-transparent">
+            {/* Nav Tabs */}
+            <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-none py-1">
+              {FILTERS.map((f) => {
+                const isSelected = activeFilter === f.id;
                 return (
-                  <div key={item.id} className="relative w-[55vw] sm:w-[42vw] md:w-[35vw] lg:w-[30vw] xl:w-[26vw] 2xl:w-[22vw] shrink-0 h-full">
-                    {/* Card Container — positioned as top 42% or bottom 42% of available height */}
-                    <div 
-                      className="absolute w-full"
-                      style={{
-                        ...(isTop
-                          ? { bottom: 'calc(50% + 1rem)', maxHeight: '42%' }
-                          : { top: 'calc(50% + 1rem)', maxHeight: '42%' }),
-                      }}
-                    >
-                      <Card3D item={item} index={i} onClick={() => setSelectedItem(item)} />
-                    </div>
-                    
-                    {/* Vertical Connector Line */}
-                    <div className={`absolute left-1/2 w-[2px] bg-blue-500 shadow-[0_0_10px_#3b82f6] -translate-x-1/2 ${
-                      isTop ? 'bottom-[50%] h-[1rem]' : 'top-[50%] h-[1rem]'
-                    }`} />
-
-                    {/* Glowing dot on the main line */}
-                    <div className="absolute top-1/2 left-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white shadow-[0_0_10px_#fff,0_0_20px_#3b82f6] -translate-x-1/2 -translate-y-1/2" />
-                  </div>
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      setActiveFilter(f.id);
+                      const filtered = filterItems(f.id);
+                      if (filtered.length > 0) {
+                        setActiveItem(filtered[0]);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-[0_2px_10px_rgba(37,99,235,0.4)] border border-blue-500/50'
+                        : 'bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
                 );
               })}
             </div>
-          </motion.div>
+
+            {/* Right Side: Avatar */}
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-white/40 hidden md:inline-block">
+                Abhay TV
+              </span>
+              <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden shadow-[0_0_10px_rgba(37,99,235,0.2)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/profile.jpg"
+                  alt="Abhay Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Featured Project Info Content (Desktop only) */}
+          <div className="hidden md:block relative z-20 max-w-xl md:max-w-2xl select-text">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeItem.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Category & Year Tag */}
+                <div className="flex items-center gap-3 mb-3 select-none">
+                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                    {activeItem.category}
+                  </span>
+                  <span className="text-[10px] font-mono font-bold text-white/40">
+                    {activeItem.year}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                  {activeItem.title}
+                </h2>
+
+                {/* Description */}
+                <p className="text-[11px] md:text-xs text-zinc-200/90 leading-relaxed mb-5 max-w-md drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+                  {activeItem.description}
+                </p>
+
+                {/* Stack used */}
+                <div className="flex flex-wrap gap-1.5 mb-5 select-none">
+                  {activeItem.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-2 py-0.5 border border-white/10 bg-white/5 rounded-full text-[9px] font-semibold text-zinc-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 select-none">
+                  {activeItem.href ? (
+                    <a
+                      href={activeItem.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-wider text-[9px] transition-all hover:scale-105 active:scale-95 shadow-[0_4px_15px_rgba(37,99,235,0.3)]"
+                    >
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                      <span>Play Live</span>
+                    </a>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-white/5 border border-white/10 text-zinc-400 rounded-full font-bold uppercase tracking-wider text-[9px] cursor-not-allowed">
+                      <Play className="w-3.5 h-3.5 opacity-35" />
+                      <span>Video Only Showcase</span>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => setSelectedItem(activeItem)}
+                    className="inline-flex items-center gap-1.5 px-4.5 py-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full font-bold uppercase tracking-wider text-[9px] transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                    <span>Watch Details</span>
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Bottom strip */}
-        <div className="relative z-20 w-full border-t border-black/10 py-4 px-4 md:px-12 flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-black/25">
-            Scroll to explore →
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-black/25">
-            © {new Date().getFullYear()} Abhay Mallick
-          </span>
+        {/* Mobile Info Container (Only visible on mobile, rendered below the video player) */}
+        <div className="block md:hidden w-full mt-4 px-1 mb-8 select-text">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeItem.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Category & Year Tag */}
+              <div className="flex items-center gap-3 mb-2 select-none">
+                <span className="bg-blue-600/10 text-blue-600 border border-blue-200 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                  {activeItem.category}
+                </span>
+                <span className="text-[10px] font-mono font-bold text-zinc-400">
+                  {activeItem.year}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-xl font-black text-[#111] uppercase tracking-tight mb-2">
+                {activeItem.title}
+              </h2>
+
+              {/* Description */}
+              <p className="text-xs text-zinc-600 leading-relaxed mb-4">
+                {activeItem.description}
+              </p>
+
+              {/* Stack used */}
+              <div className="flex flex-wrap gap-1.5 mb-5 select-none">
+                {activeItem.tools.map((tool) => (
+                  <span
+                    key={tool}
+                    className="px-2 py-0.5 border border-zinc-200 bg-zinc-50 rounded-full text-[9px] font-semibold text-zinc-600"
+                  >
+                    {tool}
+                  </span>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 select-none">
+                {activeItem.href ? (
+                  <a
+                    href={activeItem.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-wider text-[9px] transition-all"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    <span>Play Live</span>
+                  </a>
+                ) : (
+                  <div className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-zinc-100 border border-zinc-200 text-zinc-400 rounded-full font-bold uppercase tracking-wider text-[9px] cursor-not-allowed">
+                    <Play className="w-3.5 h-3.5 opacity-35" />
+                    <span>Video Only</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setSelectedItem(activeItem)}
+                  className="inline-flex items-center gap-1.5 px-4.5 py-2 border border-black/10 bg-black/5 text-[#111] rounded-full font-bold uppercase tracking-wider text-[9px] transition-all"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                  <span>Watch Details</span>
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
+        {/* Carousel Section Wrapper */}
+        <div className="w-full relative">
+          {/* Row Title */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-black tracking-widest text-zinc-400 uppercase">
+              Showcase Selection ({filteredItems.length} titles)
+            </h3>
+            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hidden md:block">
+              Hover to preview · Click to play
+            </div>
+          </div>
+
+          {/* Carousel Slider Controls Container */}
+          <div className="relative group/carousel w-full">
+            {/* Left Button */}
+            <button
+              onClick={() => scrollCarousel('left')}
+              className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 cursor-pointer shadow-xl hidden md:flex"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            
+            {/* Right Button */}
+            <button
+              onClick={() => scrollCarousel('right')}
+              className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 cursor-pointer shadow-xl hidden md:flex"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            {/* Slider track */}
+            <div
+              ref={carouselRef}
+              className="flex gap-4 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {filteredItems.map((item) => (
+                <CarouselCard
+                  key={item.id}
+                  item={item}
+                  isActive={activeItem.id === item.id}
+                  onClick={() => setActiveItem(item)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Selected Gallery Item Full-Screen Expanded Modal Overlay */}
