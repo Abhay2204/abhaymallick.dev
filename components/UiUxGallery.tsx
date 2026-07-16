@@ -646,6 +646,7 @@ export default function UiUxGallery() {
             {/* Left Button */}
             <button
               onClick={() => scrollCarousel('left')}
+              aria-label="Previous works"
               className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 cursor-pointer shadow-xl hidden md:flex"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -654,6 +655,7 @@ export default function UiUxGallery() {
             {/* Right Button */}
             <button
               onClick={() => scrollCarousel('right')}
+              aria-label="Next works"
               className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 cursor-pointer shadow-xl hidden md:flex"
             >
               <ChevronRight className="w-5 h-5" />

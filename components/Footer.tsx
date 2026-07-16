@@ -321,6 +321,7 @@ export default function Footer() {
                             <select
                               value={formType}
                               onChange={(e) => setFormType(e.target.value)}
+                              aria-label="Project Scope"
                               className="bg-white/70 border-b border-black/10 focus:border-blue-600 focus:bg-blue-50/20 px-1.5 py-0.5 text-xs font-mono text-zinc-800 focus:outline-none cursor-pointer w-36 sm:w-48 transition-colors rounded-[3px] appearance-none"
                             >
                               <option value="Web App">Web App</option>

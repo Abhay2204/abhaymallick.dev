@@ -306,6 +306,34 @@ export default function HeroSection() {
 
 
         <AnimatePresence>
+          {/* SEQUENCE 0: First Frame Instruction Tooltip */}
+          {activePhase === 0 && splashComplete && (
+            <motion.div
+              key="first-frame-instruction"
+              initial={{ opacity: 0, y: 30, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 15, x: "-50%" }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute bottom-10 left-1/2 z-30 flex flex-col md:flex-row items-center gap-4 px-6 py-3.5 bg-white/70 backdrop-blur-md border border-black/10 rounded-none shadow-[0_8px_32px_rgba(0,0,0,0.04)] pointer-events-auto select-none"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-sans font-black text-blue-600 tracking-[0.25em] uppercase">
+                  Instruction
+                </span>
+              </div>
+              <div className="hidden md:block w-[1px] h-3 bg-black/10" />
+              <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 text-[10px] font-mono text-black/60 font-semibold tracking-wider">
+                <span className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-blue-600 text-xs">🖱️</span> Right-click for menu bar
+                </span>
+                <span className="hidden md:inline text-black/20 font-light">•</span>
+                <span className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-blue-600 text-xs animate-bounce">👇</span> Scroll to explore
+                </span>
+              </div>
+            </motion.div>
+          )}
+
           {/* SEQUENCE 1: Intro (Hero 1 Start) */}
           {activePhase === 1 && (
             <>
