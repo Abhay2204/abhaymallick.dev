@@ -45,7 +45,14 @@ export default function Home() {
 
   // Return a blank screen while measuring to prevent hydration mismatch
   if (isMobile === null || !ActiveComponent) {
-    return <div className="min-h-screen bg-[#111]" />;
+    return (
+      <div className="min-h-screen bg-[#111] flex items-center justify-center relative">
+        {/* Stable HTML LCP candidate for server-side HTML rendering (color-matched to dark background) */}
+        <h1 style={{ color: '#111111', fontSize: '18px', userSelect: 'none' }}>
+          Abhay Mallick | Freelance Full Stack Developer & Software Engineer Portfolio
+        </h1>
+      </div>
+    );
   }
 
   return (
