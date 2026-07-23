@@ -100,13 +100,14 @@ export const metadata: Metadata = {
   // ── Icons ──────────────────────────────────────────────────────────────────
   icons: {
     icon: [
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
       { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/icon.png", type: "image/png", sizes: "192x192" },
     ],
     apple: [
       { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
     ],
+    shortcut: ["/icon.png"],
   },
 
   // ── Verification ───────────────────────────────────────────────────────────
@@ -143,6 +144,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Favicon & Google Site Icon Links */}
+        <link rel="icon" href="/icon.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
+
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

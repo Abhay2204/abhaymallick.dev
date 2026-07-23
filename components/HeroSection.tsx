@@ -365,13 +365,13 @@ export default function HeroSection() {
                   </div>
                   
                   <h2 className="text-[36px] md:text-[46px] lg:text-[56px] font-sans font-bold text-black leading-[1.05] tracking-tighter">
-                    Welcome to<br/>
-                    my <span className="text-blue-600">universe.</span>
+                    Architecting<br/>
+                    the <span className="text-blue-600">extraordinary.</span>
                   </h2>
                   
-                  <div className="mt-4 border-l-2 border-black/10 pl-5 py-1">
-                     <p className="text-[13px] md:text-[15px] font-sans text-black/60 leading-relaxed font-medium">
-                       Step into a world of precision engineering and carefully crafted digital experiences.
+                  <div className="mt-4 border-l-2 border-blue-600/40 pl-5 py-1">
+                     <p className="text-[13px] md:text-[15px] font-sans text-black/70 leading-relaxed font-medium">
+                       Where high-performance code meets stunning visual craft. Turning bold ideas into seamless digital products.
                      </p>
                   </div>
                 </div>

@@ -80,8 +80,8 @@ const professionalServiceSchema = {
   "@id": `${BASE_URL}/#service`,
   name: "Abhay Mallick — Freelance Full Stack & Software Development Services",
   url: BASE_URL,
-  logo: `${BASE_URL}/og-image.png`,
-  image: `${BASE_URL}/og-image.png`,
+  logo: `${BASE_URL}/icon.png`,
+  image: `${BASE_URL}/abhay-google.jpg`,
   description:
     "Professional software development and freelance services by Abhay Mallick based in Chandrapur, Maharashtra. Expert in React, Next.js, Node.js, Android (Kotlin) applications, and AI integrations.",
   provider: {
