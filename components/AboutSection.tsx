@@ -240,7 +240,7 @@ export default function AboutSection() {
       <div className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
         <h2>Abhay Mallick Developer &mdash; Full Stack Engineer</h2>
         <p>
-          Abhay Mallick is an expert freelance software developer and coder. Providing client-centered Next.js, React, Node.js, and Express stack custom systems.
+          I am an expert freelance software developer and engineer specializing in Next.js, React, Node.js, Express, and Android development.
           Based in Chandrapur, Maharashtra.
         </p>
       </div>

@@ -127,7 +127,7 @@ export default function SkillsSection() {
       <div className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
         <h2>Abhay Mallick Freelancer &mdash; Professional Stack Skills</h2>
         <p>
-          Abhay Mallick is a freelancer developer specializing in frontend Next.js, backend Express APIs, Node, SQL database indexing, and mobile Android (Kotlin) development.
+          I am a freelance developer specializing in frontend Next.js, backend Express APIs, Node, SQL database indexing, and mobile Android (Kotlin) development.
         </p>
       </div>
       {/* Abstract Background Elements */}

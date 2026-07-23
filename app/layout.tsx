@@ -180,10 +180,10 @@ export default function RootLayout({
           <h1>Abhay Mallick — Freelance Full Stack Developer &amp; Software Engineer</h1>
           <h2>About Abhay Mallick</h2>
           <p>
-            Abhay Mallick is a professional freelance software developer and full stack engineer based in Chandrapur, Maharashtra, India. With experience in Next.js, React, Node.js, and Android (Kotlin) development, Abhay builds robust digital products, custom CRM platforms, SaaS applications, and interactive web solutions for clients worldwide.
+            I am a professional freelance full-stack developer and software engineer based in Chandrapur, Maharashtra, India. With experience in Next.js, React, Node.js, and Android (Kotlin) development, I build robust digital products, custom CRM platforms, SaaS applications, and interactive web solutions for clients worldwide.
           </p>
           <p>
-            Specializing in high-performance web applications and backend systems, Abhay delivers clean code, optimized databases, and seamless user experiences. Contact Abhay Mallick for contract development and engineering services.
+            Specializing in high-performance web applications and backend systems, I deliver clean code, optimized databases, and seamless user experiences. Contact me for contract development and engineering services.
           </p>
         </div>
 
